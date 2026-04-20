@@ -1,0 +1,33 @@
+name: CSV Processing Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      file1:
+        description: "Base64 CSV File 1"
+        required: true
+      file2:
+        description: "Base64 CSV File 2"
+        required: true
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install pandas
+
+      - name: Run Script
+        env:
+          FILE1: ${{ github.event.inputs.file1 }}
+          FILE2: ${{ github.event.inputs.file2 }}
+        run: python daataupload.py
