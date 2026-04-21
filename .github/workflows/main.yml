@@ -30,4 +30,7 @@ jobs:
         env:
           FILE1: ${{ github.event.inputs.file1 }}
           FILE2: ${{ github.event.inputs.file2 }}
+          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: python daataupload.py
+
+        
