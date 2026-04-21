@@ -56,13 +56,10 @@ df3 = pd.read_csv("file2.csv")
 table_id = "bigqueryfacebook.ABCL.ABCL_MOE_DATA"
 
 job_config = bigquery.LoadJobConfig(
-    schema=schema,
     write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
-    autodetect=False
+    autodetect=True
 )
-# -----------------------------
-# 5. Upload
-# -----------------------------
+
 job = client.load_table_from_dataframe(
     df3,
     table_id,
@@ -70,8 +67,8 @@ job = client.load_table_from_dataframe(
 )
 
 job.result()
-print("✅ Data appended successfully to BigQuery 🚀")
 
+print("✅ Data appended successfully to BigQuery 🚀")
 ###############################################################################
 
 df2 = df2[~df2["DISBURSMENT_AMOUNT"].isna()].reset_index()
