@@ -13,7 +13,7 @@ import pandas as pd
 from google.oauth2 import service_account
 from google.cloud import bigquery
 
-
+'''
 encoded_key = os.environ.get("GCP_SA_KEY")
 decoded_key = json.loads(base64.b64decode(encoded_key))
 
@@ -34,10 +34,9 @@ df1 = client.query(query).to_dataframe()
 print(df1.head())
 
 ###########################################################################
-
+'''
 # Read inputs from environment variables
 file1_base64 = os.getenv("FILE1")
-file2_base64 = os.getenv("FILE2")
 
 # Decode and save
 def save_file(base64_str, filename):
@@ -45,12 +44,11 @@ def save_file(base64_str, filename):
         f.write(base64.b64decode(base64_str))
 
 save_file(file1_base64, "file1.csv")
-save_file(file2_base64, "file2.csv")
 
 # Read CSVs
 df2 = pd.read_csv("file1.csv")
-df3 = pd.read_csv("file2.csv")
-
+print(df2.head())
+'''
 ###############################################################################
 
 table_id = "bigqueryfacebook.ABCL.ABCL_MOE_DATA"
@@ -426,6 +424,11 @@ job = client.load_table_from_dataframe(
     job_config=job_config
 )
 
+
+
 job.result()
 
 print(f"✅ {table_name} uploaded successfully to BigQuery")
+
+
+'''
