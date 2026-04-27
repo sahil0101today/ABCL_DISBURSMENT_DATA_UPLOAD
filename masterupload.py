@@ -35,20 +35,13 @@ print(df1.head())
 
 ###########################################################################
 
-# Read inputs from environment variables
-file1_base64 = os.getenv("FILE1")
+# Read file path from environment variable
+file_path = os.getenv("FILE_PATH", "input.csv")  # fallback to input.csv
 
-# Decode and save
-def save_file(base64_str, filename):
-    with open(filename, "wb") as f:
-        f.write(base64.b64decode(base64_str))
+# Read CSV directly
+df2 = pd.read_csv(file_path)
 
-save_file(file1_base64, "file1.csv")
-
-# Read CSVs
-df2 = pd.read_csv("file1.csv")
 print(df2.head())
-
 ###############################################################################
 
 df1['UUID'] = df1['MOBILE_NUMBER'] + "_" + df1['EVENT_TIME'] + "_" + df1['CAMPAIGN_TAG']
