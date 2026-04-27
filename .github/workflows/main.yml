@@ -3,8 +3,8 @@ name: CSV Processing Workflow
 on:
   workflow_dispatch:
     inputs:
-      file1:
-        description: "Base64 CSV File 1"
+      file_url:
+        description: "Google Drive File URL"
         required: true
 
 jobs:
@@ -23,9 +23,21 @@ jobs:
       - name: Install Dependencies
         run: pip install -r requirements.txt
 
+      # 🔥 NEW STEP: Download file from Google Drive
+      - name: Download CSV from Drive
+        run: |
+          echo "Downloading file..."
+          curl -L "${{ github.event.inputs.file_url }}" -o input.csv
+
+      # 🔥 OPTIONAL: Debug (helps if something breaks)
+      - name: Verify File
+        run: |
+          echo "File preview:"
+          head -n 5 input.csv
+
       - name: Run Script
         env:
-          FILE1: ${{ github.event.inputs.file1 }}
+          FILE_PATH: input.csv   # ✅ pass file path instead of base64
           GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         run: python masterupload.py
         
