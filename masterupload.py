@@ -80,7 +80,7 @@ df_final = pd.concat([merged_df, df2], ignore_index=True)
 
 table_id = "bigqueryfacebook.ABCL.ABCL_ENG_DISB_MASTER_DATA"
 dataset_id = "ABCL"
-table_name = "ABCL_DISBURSMENT_DATA"
+table_name = "ABCL_ENG_DISB_MASTER_DATA"
 
 # -----------------------------
 # Drop table if exists
