@@ -59,7 +59,12 @@ merged_df = df1.merge(
     suffixes=('_df1', '_df2')
 )
 
+
 merged_df["DISBURSMENT_AMOUNT_df1"] = merged_df["DISBURSMENT_AMOUNT_df1"]+merged_df["DISBURSMENT_AMOUNT_df2"]
+merged_df["DISBURSMENT_DATE_df1"] = merged_df["DISBURSMENT_DATE_df1"].fillna(
+    merged_df["DISBURSMENT_DATE_df2"]
+)
+
 
 merged_df.drop(columns=["EVENT_TIME_df2",	"MOBILE_NUMBER_df2",	"CAMPAIGN_ID_df2",	"CAMPAIGN_CHANNEL_df2",	"CAMPAIGN_TAG_df2",	"EXPORT_DAY_df2",	"LAST_ATTRIBUTION_df2",	"DISBURSMENT_DATE_df2",	"DISBURSMENT_AMOUNT_df2"], inplace=True)
 merged_df.columns = merged_df.columns.str.replace('_df1', '', regex=False).str.replace('_df2', '', regex=False)
@@ -146,6 +151,3 @@ job = client.load_table_from_dataframe(
 job.result()
 
 print(f"✅ {table_name} uploaded successfully to BigQuery")
-
-
-
