@@ -68,13 +68,16 @@ df2 = df2[~df2['UUID'].isin(merged_df['UUID'])]
 
 df_final = pd.concat([merged_df, df2], ignore_index=True)
 
-# example column
 df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].str.replace(' 0', '', regex=False)
-# convert to datetime
-df_final['DISBURSMENT_DATE'] = pd.to_datetime(df_final['DISBURSMENT_DATE'], format='%d-%b-%y')
-# format to dd-mm-YYYY
+
+df_final['DISBURSMENT_DATE'] = pd.to_datetime(
+    df_final['DISBURSMENT_DATE'],
+    errors='coerce',   # prevents crash
+    dayfirst=True      # important for Indian format
+)
+
 df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].dt.strftime('%d-%m-%Y')
-######################################################################################
+#####################################################################################
 
 table_id = "bigqueryfacebook.ABCL.ABCL_ENG_DISB_MASTER_DATA"
 dataset_id = "ABCL"
