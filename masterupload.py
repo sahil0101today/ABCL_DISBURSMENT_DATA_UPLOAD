@@ -121,15 +121,19 @@ df2_remaining = df2[~df2['UUID'].isin(df1["UUID"])].reset_index(drop=True)
 
 df_final = pd.concat([df1, df2_remaining], ignore_index=True)
 
-df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].str.replace(' 0', '', regex=False)
+df_final['DISBURSMENT_DATE'] = (
+    df_final['DISBURSMENT_DATE']
+    .astype(str)
+    .str.replace(' 0', '', regex=False)
+)
 
 df_final['DISBURSMENT_DATE'] = pd.to_datetime(
     df_final['DISBURSMENT_DATE'],
-    errors='coerce',   # prevents crash
-    dayfirst=True      # important for Indian format
+    errors='coerce',
+    dayfirst=True
 )
 
-df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].dt.strftime('%d-%m-%Y')
+df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].dt.strftime('%Y%m%d%H%M%S')
 #####################################################################################
 
 
