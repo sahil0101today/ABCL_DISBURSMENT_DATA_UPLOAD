@@ -133,7 +133,7 @@ df_final['DISBURSMENT_DATE'] = pd.to_datetime(
     dayfirst=True
 )
 
-df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].dt.strftime('%Y%m%d%H%M%S')
+df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].dt.strftime('%Y%m%d')
 #####################################################################################
 
 
