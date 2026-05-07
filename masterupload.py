@@ -44,6 +44,21 @@ df2 = pd.read_csv(file_path)
 print(df2.head())
 ###############################################################################
 
+df1['CAMPAIGN_TAG'] = (
+    df1['CAMPAIGN_TAG']
+    .fillna('UNKNOWN')
+    .astype(str)
+    .str.strip()
+)
+
+df2['CAMPAIGN_TAG'] = (
+    df2['CAMPAIGN_TAG']
+    .fillna('UNKNOWN')
+    .astype(str)
+    .str.strip()
+)
+
+
 df1['UUID'] = df1['MOBILE_NUMBER'] + "_" + df1['EVENT_TIME'] + "_" + df1['CAMPAIGN_TAG']
 df2['UUID'] = df2['MOBILE_NUMBER'] + "_" + df2['EVENT_TIME'] + "_" + df2['CAMPAIGN_TAG']
 
@@ -84,17 +99,23 @@ for idx, row in df1.iterrows():
 
         # If already present in df1, create new row from df2
         else:
-            new_rows.append(df2_row.to_dict())
+            # Convert entire row to dict
+            new_row = df2_row.to_dict()
 
-            # Mark UUID as used for new row addition
+            # Explicitly keep UUID
+            new_row['UUID'] = uuid
+
+            new_rows.append(new_row)
+
+            # Mark UUID as used
             used_uuids.add(uuid)
+
 
 # Append new rows to df1
 if len(new_rows) > 0:
     df1 = pd.concat([df1, pd.DataFrame(new_rows)], ignore_index=True)
 
 # Remove used UUIDs from df2
-df2_remaining = df2[~df2['UUID'].isin(used_uuids)].reset_index(drop=True)
 df2_remaining = df2[~df2['UUID'].isin(df1["UUID"])].reset_index(drop=True)
 
 
@@ -110,6 +131,7 @@ df_final['DISBURSMENT_DATE'] = pd.to_datetime(
 
 df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].dt.strftime('%d-%m-%Y')
 #####################################################################################
+
 
 table_id = "bigqueryfacebook.ABCL.ABCL_ENG_DISB_MASTER_DATA"
 dataset_id = "ABCL"
