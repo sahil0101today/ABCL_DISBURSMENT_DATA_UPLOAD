@@ -50,28 +50,55 @@ df2['UUID'] = df2['MOBILE_NUMBER'] + "_" + df2['EVENT_TIME'] + "_" + df2['CAMPAI
 df1['DISBURSMENT_AMOUNT'] = pd.to_numeric(df1['DISBURSMENT_AMOUNT'], errors='coerce').fillna(0)
 df2['DISBURSMENT_AMOUNT'] = pd.to_numeric(df2['DISBURSMENT_AMOUNT'], errors='coerce').fillna(0)
 
-df2_dummy = df2[~df2["DISBURSMENT_AMOUNT"].isna()].reset_index()
+df2_dummy = df2[~df2["DISBURSMENT_DATE"].isna()].reset_index(drop=True)
 
-merged_df = df1.merge(
-    df2_dummy[['UUID', "EVENT_TIME",	"MOBILE_NUMBER",	"CAMPAIGN_ID",	"CAMPAIGN_CHANNEL",	"CAMPAIGN_TAG",	"EXPORT_DAY",	"LAST_ATTRIBUTION",	"DISBURSMENT_DATE",	"DISBURSMENT_AMOUNT"]],
-    on='UUID',
-    how='left',
-    suffixes=('_df1', '_df2')
-)
+# Create lookup from df2
+df2_lookup = df2_dummy.set_index('UUID')
+
+new_rows = []
+
+# Track UUIDs used
+used_uuids = set()
+
+for idx, row in df1.iterrows():
+
+    uuid = row['UUID']
+
+    # Check UUID exists in df2
+    if uuid in df2_lookup.index:
+
+        df2_row = df2_lookup.loc[uuid]
+
+        # If multiple records exist in df2 for same UUID
+        if isinstance(df2_row, pd.DataFrame):
+            df2_row = df2_row.iloc[0]
+
+        # If DISBURSMENT_DATE in df1 is empty/null
+        if pd.isna(row['DISBURSMENT_DATE']):
+
+            df1.at[idx, 'DISBURSMENT_AMOUNT'] = df2_row['DISBURSMENT_AMOUNT']
+            df1.at[idx, 'DISBURSMENT_DATE'] = df2_row['DISBURSMENT_DATE']
+
+            # Mark UUID as used for modification
+            used_uuids.add(uuid)
+
+        # If already present in df1, create new row from df2
+        else:
+            new_rows.append(df2_row.to_dict())
+
+            # Mark UUID as used for new row addition
+            used_uuids.add(uuid)
+
+# Append new rows to df1
+if len(new_rows) > 0:
+    df1 = pd.concat([df1, pd.DataFrame(new_rows)], ignore_index=True)
+
+# Remove used UUIDs from df2
+df2_remaining = df2[~df2['UUID'].isin(used_uuids)].reset_index(drop=True)
+df2_remaining = df2[~df2['UUID'].isin(df1["UUID"])].reset_index(drop=True)
 
 
-merged_df["DISBURSMENT_AMOUNT_df1"] = merged_df["DISBURSMENT_AMOUNT_df1"]+merged_df["DISBURSMENT_AMOUNT_df2"]
-merged_df["DISBURSMENT_DATE_df1"] = merged_df["DISBURSMENT_DATE_df1"].fillna(
-    merged_df["DISBURSMENT_DATE_df2"]
-)
-
-
-merged_df.drop(columns=["EVENT_TIME_df2",	"MOBILE_NUMBER_df2",	"CAMPAIGN_ID_df2",	"CAMPAIGN_CHANNEL_df2",	"CAMPAIGN_TAG_df2",	"EXPORT_DAY_df2",	"LAST_ATTRIBUTION_df2",	"DISBURSMENT_DATE_df2",	"DISBURSMENT_AMOUNT_df2"], inplace=True)
-merged_df.columns = merged_df.columns.str.replace('_df1', '', regex=False).str.replace('_df2', '', regex=False)
-
-df2 = df2[~df2['UUID'].isin(merged_df['UUID'])]
-
-df_final = pd.concat([merged_df, df2], ignore_index=True)
+df_final = pd.concat([df1, df2_remaining], ignore_index=True)
 
 df_final['DISBURSMENT_DATE'] = df_final['DISBURSMENT_DATE'].str.replace(' 0', '', regex=False)
 
